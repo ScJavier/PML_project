@@ -1,0 +1,100 @@
+---
+title: "Practical Machine Learning. Course Project"
+author: "Javier Santibáñez"
+date: "24 de julio de 2015"
+output: html_document
+---
+
+## Introduction
+
+## Methods
+
+### Get and cleaning data
+
+The first step is getting data. For reproducibility issues we used the following code to download the data sets:
+
+```{r,results='hide'}
+setwd("C:/Users/Javier/Google Drive/Coursera/Data Science Specialization/08 - Practical Machine Learning/Coursera_PML-PA_project")
+
+if(!file.exists("../pml-training.csv"))
+{
+  download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-t|raining.csv", "pml-training.csv")
+}
+
+if(!file.exists("../pml-testing.csv"))
+{
+  download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", "pml-testing.csv")
+}
+
+suppressMessages(library(caret))
+```
+
+The we cleaned both data sets to keep only useful variables, this is, non-zero variables and variables with no more than 20% of missing values. Te code we use for that is:
+
+```{r,results = 'hide', cache = TRUE}
+training <- read.csv("../pml-training.csv")
+testing <- read.csv("../pml-testing.csv")
+
+# For non-zero variables
+stuff <- nearZeroVar(training[,-160])
+training <- training[, -stuff]
+testing <- testing[, -stuff]
+
+# For no more than 20% of missing values
+na.obs <- apply(is.na(training), 2, sum)
+pct.na.obs <- na.obs/dim(training)[1]*100
+keepvar <- pct.na.obs<20
+training <- training[, keepvar]
+testing <- testing[, keepvar]
+```
+
+Finaly, we have a trainig set with `r dim(training)[1]` observations and `r dim(training)[2]-1` features for prediction.
+
+### Data slicing
+
+To estimate the *out of sample* error, we divided the training set into two subsets: one *subtraining* set, with 60% of the observarions, and one *validating* set, with the remaining observations. 
+
+```{r, results = 'hide'}
+set.seed(147) # For reproducibility
+subt_index <- createDataPartition(training$classe, p = 0.60, list = FALSE)
+subtraining <- training[subt_index, ]
+validating <- training[-subt_index, ]
+```
+
+### Training options
+
+In the course's lessons we mainly learned about classification and regression trees and some other methods to improve its accuracy. So we can order this methods as follows:
+
+1. Basic trees,
+2. Bagging trees,
+3. Random forests/boosting trees
+
+At the top of usefulness are random forests and boosting trees. We declined to the second option due to computational issues. Also, we had to set the tunning parameters at the values:
+
+- `n.trees = 50`
+- `interaction.depth = 4`
+- `shrinkage = 0.1`
+- `n.minobsnode = 100`
+
+That selection did not follow a rational process but it reduces computational time.
+
+Finally, the model was trained with the following instructions:
+
+```{r, results = 'hide', cache = TRUE}
+tune.gbm=data.frame(n.trees=50,
+                    interaction.depth=4,
+                    shrinkage=0.1,
+                    n.minobsinnode=100)
+
+model_1<-train(classe~., data = subtraining, method = "gbm",
+               tuneGrid=tune.gbm, verbose = FALSE,
+               trControl=trainControl(method="boot",number=10))
+```
+
+## Results
+
+````{r}
+confusionMatrix(predict(model_1,validating),validating$classe)
+```
+
+## Conclussions
