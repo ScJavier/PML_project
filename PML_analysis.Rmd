@@ -129,12 +129,6 @@ results
 
 From the above results we can see that our model has an accuracy of `r results$overall["Accuracy"]`, this is, we estimate a out of sample error of `r 1 - results$overall["Accuracy"]`. Then , we expect for a low error of prediction for new observations.
 
-Finaly, we use the model to predict observations in test set. The next code shows our results.
-
-```{r}
-predict(model_1, testing)
-```
-
-Our model predicts all new obseravations to be for the same category, this is some strange. However we have confidence in our results because we estimated a low out of sample error from the validating set.
+Finaly, we use the model to predict observations in test set. We have confidence in our results because we estimated a low out of sample error from the validating set.
 
 
