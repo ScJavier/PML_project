@@ -1,11 +1,38 @@
 ---
 title: "Practical Machine Learning. Course Project"
 author: "Javier Santibáñez"
-date: "24 de julio de 2015"
+date: "July 24th, 2015"
 output: html_document
 ---
 
 ## Introduction
+
+This project is about to train a statistical model to predict how 6 participants do certain exercises. It is important to consider thar we have some troubles related with computational times, so we do not use properly cross-validation to select tunning parameters for our model.
+
+### Background
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
+
+### What you should submit
+
+The goal of your project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases. 
+
+1. Your submission should consist of a link to a Github repo with your R markdown and compiled HTML file describing your analysis. Please constrain the text of the writeup to < 2000 words and the number of figures to be less than 5. It will make it easier for the graders if you submit a repo with a gh-pages branch so the HTML page can be viewed online.
+2. You should also apply your machine learning algorithm to the 20 test cases available in the test data above. Please submit your predictions in appropriate format to the programming assignment for automated grading. See the programming assignment for additional details. 
+
+
+### Data 
+
+
+The training data for this project are available here: 
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here: 
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment. 
 
 ## Methods
 
@@ -14,7 +41,7 @@ output: html_document
 The first step is getting data. For reproducibility issues we used the following code to download the data sets:
 
 ```{r,results='hide'}
-setwd("C:/Users/Javier/Google Drive/Coursera/Data Science Specialization/08 - Practical Machine Learning/Coursera_PML-PA_project")
+setwd("C:/Users/Javier/Google Drive/Coursera/Data Science Specialization/08 - Practical Machine Learning/PML_project")
 
 if(!file.exists("../pml-training.csv"))
 {
@@ -76,9 +103,9 @@ At the top of usefulness are random forests and boosting trees. We declined to t
 - `shrinkage = 0.1`
 - `n.minobsnode = 100`
 
-That selection did not follow a rational process but it reduces computational time.
+That selection did not follow a rational process but it reduces computational time. So, in this case we did not use correctly cross-validation ti select a model, as we shlould do, for example to select the tune parameters.
 
-Finally, the model was trained with the following instructions:
+Finaly, the model was trained with the following instructions:
 
 ```{r, results = 'hide', cache = TRUE}
 tune.gbm=data.frame(n.trees=50,
@@ -93,8 +120,21 @@ model_1<-train(classe~., data = subtraining, method = "gbm",
 
 ## Results
 
-````{r}
-confusionMatrix(predict(model_1,validating),validating$classe)
+To estimate the out of sample error we used the validating set. The following results correspond to the confussion matrix.
+
+```{r}
+results <- confusionMatrix(predict(model_1,validating),validating$classe)
+results
 ```
 
-## Conclussions
+From the above results we can see that our model has an accuracy of `r results$overall["Accuracy"]`, this is, we estimate a out of sample error of `r 1 - results$overall["Accuracy"]`. Then , we expect for a low error of prediction for new observations.
+
+Finaly, we use the model to predict observations in test set. The next code shows our results.
+
+```{r}
+predict(model_1, testing)
+```
+
+Our model predicts all new obseravations to be for the same category, this is some strange. However we have confidence in our results because we estimated a low out of sample error from the validating set.
+
+

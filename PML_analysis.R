@@ -1,4 +1,4 @@
-setwd("C:/Users/Javier/Google Drive/Coursera/Data Science Specialization/08 - Practical Machine Learning/Coursera_PML-PA_project")
+setwd("C:/Users/Javier/Google Drive/Coursera/Data Science Specialization/08 - Practical Machine Learning/PML_project")
 
 if(!file.exists("../pml-training.csv"))
 {

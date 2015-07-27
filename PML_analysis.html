@@ -63,19 +63,40 @@ img {
 <div id="header">
 <h1 class="title">Practical Machine Learning. Course Project</h1>
 <h4 class="author"><em>Javier Santibáñez</em></h4>
-<h4 class="date"><em>24 de julio de 2015</em></h4>
+<h4 class="date"><em>July 24th, 2015</em></h4>
 </div>
 
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
+<p>This project is about to train a statistical model to predict how 6 participants do certain exercises. It is important to consider thar we have some troubles related with computational times, so we do not use properly cross-validation to select tunning parameters for our model.</p>
+<div id="background" class="section level3">
+<h3>Background</h3>
+<p>Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <a href="http://groupware.les.inf.puc-rio.br/har" class="uri">http://groupware.les.inf.puc-rio.br/har</a> (see the section on the Weight Lifting Exercise Dataset).</p>
+</div>
+<div id="what-you-should-submit" class="section level3">
+<h3>What you should submit</h3>
+<p>The goal of your project is to predict the manner in which they did the exercise. This is the “classe” variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases.</p>
+<ol style="list-style-type: decimal">
+<li>Your submission should consist of a link to a Github repo with your R markdown and compiled HTML file describing your analysis. Please constrain the text of the writeup to &lt; 2000 words and the number of figures to be less than 5. It will make it easier for the graders if you submit a repo with a gh-pages branch so the HTML page can be viewed online.</li>
+<li>You should also apply your machine learning algorithm to the 20 test cases available in the test data above. Please submit your predictions in appropriate format to the programming assignment for automated grading. See the programming assignment for additional details.</li>
+</ol>
+</div>
+<div id="data" class="section level3">
+<h3>Data</h3>
+<p>The training data for this project are available here:</p>
+<p><a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv" class="uri">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv</a></p>
+<p>The test data are available here:</p>
+<p><a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv" class="uri">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv</a></p>
+<p>The data for this project come from this source: <a href="http://groupware.les.inf.puc-rio.br/har" class="uri">http://groupware.les.inf.puc-rio.br/har</a>. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment.</p>
+</div>
 </div>
 <div id="methods" class="section level2">
 <h2>Methods</h2>
 <div id="get-and-cleaning-data" class="section level3">
 <h3>Get and cleaning data</h3>
 <p>The first step is getting data. For reproducibility issues we used the following code to download the data sets:</p>
-<pre class="r"><code>setwd(&quot;C:/Users/Javier/Google Drive/Coursera/Data Science Specialization/08 - Practical Machine Learning/Coursera_PML-PA_project&quot;)
+<pre class="r"><code>setwd(&quot;C:/Users/Javier/Google Drive/Coursera/Data Science Specialization/08 - Practical Machine Learning/PML_project&quot;)
 
 if(!file.exists(&quot;../pml-training.csv&quot;))
 {
@@ -128,8 +149,8 @@ validating &lt;- training[-subt_index, ]</code></pre>
 <li><code>shrinkage = 0.1</code></li>
 <li><code>n.minobsnode = 100</code></li>
 </ul>
-<p>That selection did not follow a rational process but it reduces computational time.</p>
-<p>Finally, the model was trained with the following instructions:</p>
+<p>That selection did not follow a rational process but it reduces computational time. So, in this case we did not use correctly cross-validation ti select a model, as we shlould do, for example to select the tune parameters.</p>
+<p>Finaly, the model was trained with the following instructions:</p>
 <pre class="r"><code>tune.gbm=data.frame(n.trees=50,
                     interaction.depth=4,
                     shrinkage=0.1,
@@ -155,7 +176,8 @@ model_1&lt;-train(classe~., data = subtraining, method = &quot;gbm&quot;,
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>
-<pre class="r"><code>confusionMatrix(predict(model_1,validating),validating$classe)</code></pre>
+<p>To estimate the out of sample error we used the validating set. The following results correspond to the confussion matrix.</p>
+<pre class="r"><code>results &lt;- confusionMatrix(predict(model_1,validating),validating$classe)</code></pre>
 <pre><code>## Loading required package: gbm
 ## Loading required package: survival
 ## 
@@ -169,6 +191,7 @@ model_1&lt;-train(classe~., data = subtraining, method = &quot;gbm&quot;,
 ## Loading required package: parallel
 ## Loaded gbm 2.1.1
 ## Loading required package: plyr</code></pre>
+<pre class="r"><code>results</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
@@ -200,9 +223,12 @@ model_1&lt;-train(classe~., data = subtraining, method = &quot;gbm&quot;,
 ## Detection Rate         0.2843   0.1935   0.1744   0.1637   0.1838
 ## Detection Prevalence   0.2843   0.1936   0.1745   0.1637   0.1839
 ## Balanced Accuracy      0.9998   0.9999   0.9999   0.9992   0.9999</code></pre>
-</div>
-<div id="conclussions" class="section level2">
-<h2>Conclussions</h2>
+<p>From the above results we can see that our model has an accuracy of 0.9996176, this is, we estimate a out of sample error of 3.823604410^{-4}. Then , we expect for a low error of prediction for new observations.</p>
+<p>Finaly, we use the model to predict observations in test set. The next code shows our results.</p>
+<pre class="r"><code>predict(model_1, testing)</code></pre>
+<pre><code>##  [1] A A A A A A A A A A A A A A A A A A A A
+## Levels: A B C D E</code></pre>
+<p>Our model predicts all new obseravations to be for the same category, this is some strange. However we have confidence in our results because we estimated a low out of sample error from the validating set.</p>
 </div>
 
 
